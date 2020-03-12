@@ -1,0 +1,16 @@
+#!/bin/bash
+#doSnapshot
+date
+echo "Iniciando Snapshot"
+echo
+sleep 2
+curl -XPUT 'localhost:9200/_snapshot/es_backup/snapshot_1?wait_for_completion=true' -d '{
+    "indices": "NOME_INDICE"
+}'
+sleep 2
+echo
+echo "Snapshot finalizado!"
+date
+sleep 2
+echo
+

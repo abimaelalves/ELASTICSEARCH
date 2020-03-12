@@ -1,0 +1,38 @@
+#!/bin/bash
+DATE=`date +%Y-%m-%d`
+SRC=CAMINHO_DO_VOLUME_DO_ELASTIC
+DEST=/backup/elasticsearch/   #CAMINHO DE ONDE SERÁ ARMAZENADO O BACKUP
+# Compress backup
+date
+echo "Validando o backup..."
+echo
+sleep 2
+
+export STATUS=$(grep "failed" CAMINHO_DO_VOLUME_DO_ELASTIC/doSnapshot.log | cut -d, -f13 | cut -d: -f2)
+
+if [ "$STATUS" == "0" ]
+then
+    echo "Backup concluido sem falhas!"
+    echo "Compactando backup..."
+    echo
+    sleep 2
+    tar -cpzvf $DEST/es$DATE.tar $SRC/backup
+    sleep 2
+    rm -rf $SRC/backup/*
+    echo
+    echo "Compactacao finalizada!"
+else
+    echo "ERRO - Backup concluido COM FALHAS!"
+    echo "Falha no backup do elasticsearch" | mail -s "Alerta no Backup do Elasticsearch" email@email.com.br < CAMINHO_DO_VOLUME_DO_ELASTIC/doSnapshot.log
+    rm -rf $SRC/backup/*
+fi
+sleep 3
+echo
+# Delete older backups +15 days
+echo "Excluindo backups com mais de 15 dias..."
+sleep 2
+find $DEST -type f -mtime +15 -exec rm {} \;
+echo
+echo "Limpeza finalizada!"
+date
+
